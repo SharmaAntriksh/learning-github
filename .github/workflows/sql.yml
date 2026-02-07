@@ -1,0 +1,28 @@
+name: SQL
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sqlfluff:
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('**/*.sql') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install sqlfluff
+        run: |
+          python -m pip install -U pip
+          python -m pip install sqlfluff
+
+      - name: Lint SQL
+        run: |
+          sqlfluff lint .

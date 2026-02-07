@@ -1,0 +1,28 @@
+name: Manual playground
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Message to print"
+        required: true
+        default: "Hello from workflow_dispatch"
+      fail:
+        description: "Force failure"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ inputs.message }}"
+      - run: |
+          if [ "${{ inputs.fail }}" = "true" ]; then
+            echo "Failing on purpose"
+            exit 1
+          fi
