@@ -2,8 +2,14 @@ name: Power BI checks
 
 on:
   pull_request:
+    paths:
+      - "**/*.pbip"
+      - "**/*.pbix"
   push:
     branches: [main]
+    paths:
+      - "**/*.pbip"
+      - "**/*.pbix"
 
 permissions:
   contents: read
@@ -11,21 +17,21 @@ permissions:
 jobs:
   pbip:
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('**/*.pbip', '**/*.pbix') != '' }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Block PBIX commits (optional)
+        shell: bash
         run: |
-          if ls **/*.pbix 1> /dev/null 2>&1; then
+          if find . -name "*.pbix" -print -quit | grep -q .; then
             echo "PBIX detected. Consider PBIP for source control-friendly diffs."
             # exit 1  # uncomment if you want to hard-fail
           else
             echo "No PBIX files found."
           fi
 
-      - name: Ensure PBIP folder has expected files (best-effort)
+      - name: PBIP count
+        shell: bash
         run: |
-          # Basic check: pbip exists and is not empty
-          count=$(find . -name "*.pbip" | wc -l)
+          count=$(find . -name "*.pbip" | wc -l | tr -d ' ')
           echo "PBIP files: $count"
