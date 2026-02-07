@@ -1,0 +1,19 @@
+name: Scheduled health
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"  # Mondays 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repo health
+        run: |
+          echo "Default branch: $GITHUB_REF_NAME"
+          ls -la
