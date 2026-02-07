@@ -2,8 +2,14 @@ name: SQL
 
 on:
   pull_request:
+    paths:
+      - "**/*.sql"
+      - ".github/workflows/sql.yml"
   push:
     branches: [main]
+    paths:
+      - "**/*.sql"
+      - ".github/workflows/sql.yml"
 
 permissions:
   contents: read
@@ -11,9 +17,9 @@ permissions:
 jobs:
   sqlfluff:
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('**/*.sql') != '' }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

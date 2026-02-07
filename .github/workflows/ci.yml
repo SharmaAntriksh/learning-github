@@ -1,9 +1,25 @@
-name: CI
+name: CI (Python + .NET)
 
 on:
   push:
     branches: [main]
+    paths:
+      - "**/*.py"
+      - "pyproject.toml"
+      - "requirements.txt"
+      - "requirements-dev.txt"
+      - ".github/workflows/ci.yml"
+      - "**/*.sln"
+      - "**/*.csproj"
   pull_request:
+    paths:
+      - "**/*.py"
+      - "pyproject.toml"
+      - "requirements.txt"
+      - "requirements-dev.txt"
+      - ".github/workflows/ci.yml"
+      - "**/*.sln"
+      - "**/*.csproj"
 
 permissions:
   contents: read
@@ -12,13 +28,15 @@ jobs:
   python:
     name: Python (ruff + pytest)
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('**/*.py') != '' }}
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -39,7 +57,7 @@ jobs:
   dotnet:
     name: .NET (build + test)
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('**/*.sln', '**/*.csproj') != '' }}
+
     steps:
       - uses: actions/checkout@v4
 
