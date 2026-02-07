@@ -1,4 +1,4 @@
-name: CI (Python + .NET)
+name: Python CI
 
 on:
   push:
@@ -8,25 +8,21 @@ on:
       - "pyproject.toml"
       - "requirements.txt"
       - "requirements-dev.txt"
-      - ".github/workflows/ci.yml"
-      - "**/*.sln"
-      - "**/*.csproj"
+      - ".github/workflows/python-ci.yml"
   pull_request:
     paths:
       - "**/*.py"
       - "pyproject.toml"
       - "requirements.txt"
       - "requirements-dev.txt"
-      - ".github/workflows/ci.yml"
-      - "**/*.sln"
-      - "**/*.csproj"
+      - ".github/workflows/python-ci.yml"
 
 permissions:
   contents: read
 
 jobs:
   python:
-    name: Python (ruff + pytest)
+    name: ruff + pytest
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -53,24 +49,3 @@ jobs:
       - name: Tests (pytest)
         run: |
           if [ -d tests ]; then pytest -q; else echo "No tests/ folder"; fi
-
-  dotnet:
-    name: .NET (build + test)
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "8.0.x"
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build -c Release --no-restore
-
-      - name: Test
-        run: dotnet test -c Release --no-build --verbosity minimal

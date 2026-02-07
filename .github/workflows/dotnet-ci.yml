@@ -1,0 +1,65 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.sln"
+      - "**/*.csproj"
+      - ".github/workflows/dotnet-ci.yml"
+  pull_request:
+    paths:
+      - "**/*.sln"
+      - "**/*.csproj"
+      - ".github/workflows/dotnet-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  dotnet:
+    name: restore + build + test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find solution or project
+        id: find
+        shell: bash
+        run: |
+          SLN=$(find . -maxdepth 5 -name "*.sln" | head -n 1 || true)
+          CSPROJ=$(find . -maxdepth 8 -name "*.csproj" | head -n 1 || true)
+
+          if [ -n "$SLN" ]; then
+            echo "target=$SLN" >> "$GITHUB_OUTPUT"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -n "$CSPROJ" ]; then
+            echo "target=$CSPROJ" >> "$GITHUB_OUTPUT"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "No .sln/.csproj found; skipping."
+
+      - name: Setup .NET
+        if: ${{ steps.find.outputs.found == 'true' }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        if: ${{ steps.find.outputs.found == 'true' }}
+        run: dotnet restore "${{ steps.find.outputs.target }}"
+
+      - name: Build
+        if: ${{ steps.find.outputs.found == 'true' }}
+        run: dotnet build "${{ steps.find.outputs.target }}" -c Release --no-restore
+
+      - name: Test
+        if: ${{ steps.find.outputs.found == 'true' }}
+        run: dotnet test "${{ steps.find.outputs.target }}" -c Release --no-build --verbosity minimal
